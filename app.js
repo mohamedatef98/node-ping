@@ -1,8 +1,20 @@
 const { createServer } = require('http')
+const { exec } = require('child_process')
+
+const restartThingsBoardCmd = 'sudo service thingsboard restart'
+const getThingsBoardStatusCmd = 'sudo service thingsboard status'
 
 const server = createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'plain/text' })
-    res.end('Hello world')
+    if (req.url === '/') exec(getThingsBoardStatusCmd, (err, stdout, stderr) => {
+        if (err) res.end(JSON.stringify({ err, stderr }))
+        res.end(JSON.stringify({ stdout }))
+    })
+
+    else if (req.url === '/restart') exec(restartThingsBoardCmd, (err, stdout, stderr) => {
+        if (err) res.end(JSON.stringify({ err, stderr }))
+        res.end('Restarted')
+    })
 })
 
 server.listen(3000)
