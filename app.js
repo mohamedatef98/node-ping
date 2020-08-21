@@ -5,7 +5,7 @@ const restartThingsBoardCmd = 'sudo service thingsboard restart'
 const getThingsBoardStatusCmd = 'sudo service thingsboard status'
 
 const server = createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'plain/text' })
+    res.writeHead(200, { 'Content-Type': 'application/json' })
     if (req.url === '/') exec(getThingsBoardStatusCmd, (err, stdout, stderr) => {
         if (err) res.end(JSON.stringify({ err, stderr }))
         res.end(JSON.stringify({ stdout }))
@@ -13,7 +13,7 @@ const server = createServer((req, res) => {
 
     else if (req.url === '/restart') exec(restartThingsBoardCmd, (err, stdout, stderr) => {
         if (err) res.end(JSON.stringify({ err, stderr }))
-        res.end('Restarted')
+        res.end(JSON.stringify({ message: 'RESTARTED', stdout }))
     })
 })
 
