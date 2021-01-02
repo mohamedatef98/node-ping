@@ -1,22 +1,14 @@
-const { createServer } = require('http')
-const { exec } = require('child_process')
+var express = require('express')
+var app = express()
+var fs = require('fs')
 
-const restartThingsBoardCmd = 'sudo service thingsboard restart'
-const getThingsBoardStatusCmd = 'sudo service thingsboard status'
 
-const server = createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' })
-    if (req.url === '/') exec(getThingsBoardStatusCmd, (err, stdout, stderr) => {
-        if (err) res.end(JSON.stringify({ err, stderr }))
-        res.end(JSON.stringify({ stdout }))
-    })
-
-    else if (req.url === '/restart') exec(restartThingsBoardCmd, (err, stdout, stderr) => {
-        if (err) res.end(JSON.stringify({ err, stderr }))
-        res.end(JSON.stringify({ message: 'RESTARTED', stdout }))
-    })
+app.get('/', function (req, res) {
+    var file = fs.readFileSync('./index.html', 'UTF-8')
+    res.status(200)
+    res.setHeader('Content-Type', 'text/html')
+    res.send(file)
+    res.end()
 })
 
-server.listen(3000)
-
-console.log('Server is running')
+app.listen(80, function() { console.log('Server is running') })

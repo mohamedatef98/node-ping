@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cube</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .cube {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      grid-template-rows: auto auto auto;
+      grid-template-areas: ". up ."
+        "left box right"
+        ". down .";
+      justify-items: center;
+      justify-self: center;
+      grid-gap: 10px 10px;
+      perspective: 1000px;
+      perspective-origin: center;
+    }
+
+    .cube .up {
+      grid-area: up;
+    }
+
+    .cube .down {
+      grid-area: down;
+    }
+
+    .cube .left {
+      grid-area: left;
+    }
+
+    .cube .right {
+      grid-area: right;
+    }
+
+    .cube>button {
+      align-self: center;
+    }
+
+    .cube>div {
+      position: relative;
+      grid-area: box;
+    }
+
+    .face {
+      position: absolute;
+      font-size: 5rem;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!--Very Simple Interface-->
+  <div class="cube">
+    <button class="up">UP</button>
+    <button class="down">DO</button>
+    <button class="left">LE</button>
+    <button class="right">RI</button>
+    <div class="cube-items" sideLength="400px" duration="1000ms">
+      <div class="face face-0" style="background-color: rgba(255, 0, 0, 0.74)">1</div>
+      <div class="face face-1" style="background-color: rgba(0, 128, 0, 0.74)">2</div>
+      <div class="face face-2" style="background-color: rgba(0, 0, 255, 0.74)">3</div>
+      <div class="face face-3" style="background-color: rgba(255, 255, 0, 0.74)">4</div>
+      <div class="face face-4" style="background-color: rgba(128, 0, 128, 0.74)">5</div>
+      <div class="face face-5" style="background-color: rgba(128, 128, 128, 0.74)">6</div>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    const log = (...args) => {
+      args.forEach(arg => console.dir(arg));
+    }
+    const cube = document.querySelector('.cube');
+    const cubeItems = document.querySelector('.cube-items');
+
+    const sideLength = cubeItems.attributes['sideLength'].value;
+    let sideLengthNumber = sideLength.slice(0, -2);
+    let sideLengthUnit = sideLength.slice(-2);
+
+    const duration = cubeItems.attributes['duration'] ? cubeItems.attributes['duration'].value.slice(0, -2) : 500;
+
+    let faces = Array.from(document.querySelectorAll('.cube-items > .face'));
+    let lastest = {
+      tag: undefined,
+      direction: undefined,
+      axies: undefined,
+      preserve: false
+    };
+
+    const up = document.querySelector('.cube .up');
+    const down = document.querySelector('.cube .down');
+    const left = document.querySelector('.cube .left');
+    const right = document.querySelector('.cube .right');
+
+    let order = [0, 1, 2, 3, 4, 5];
+
+    const animations = {
+      up: () => {
+        lastest.tag.style.transform += `rotateX(-90deg)`;
+        lastest.axies = 'X';
+        lastest.direction = '-';
+        clicked();
+      },
+      down: () => {
+        lastest.tag.style.transform += `rotateX(90deg)`;
+        lastest.axies = 'X';
+        lastest.direction = '+';
+        lastest.preserve = true;
+        clicked();
+      },
+      right: () => {
+        lastest.tag.style.transform += 'rotateY(-90deg)';
+        lastest.axies = 'Y';
+        lastest.direction = '-';
+        lastest.preserve = false;
+        clicked();
+      },
+      left: () => {
+        lastest.tag.style.transform += "rotateY(90deg)";
+        lastest.axies = 'Y';
+        lastest.direction = '+';
+        lastest.preserve = false;
+        clicked();
+      }
+    };
+
+
+
+    (function () {
+
+      const styleTag = document.createElement('style');
+      styleTag.innerHTML = `
+        .full{
+            width: ${sideLength};
+            height: ${sideLength};
+        }
+
+        .centerOrigin{
+            transform-origin: center center ${String(-sideLengthNumber / 2) + sideLengthUnit};
+        }
+
+        .cover{
+            transition: transform ${duration}ms ease-in-out;
+            transform-style: preserve-3d;
+        }
+    `;
+      document.querySelector('head').appendChild(styleTag);
+
+      cubeItems.classList.add('full', 'cover', 'centerOrigin');
+      lastest.tag = cubeItems;
+
+      faces.forEach(face => {
+        face.classList.add('full');
+      });
+
+      faces[0].style.transform = "";
+
+
+      faces[1].style.transformOrigin = "left";
+      faces[1].style.transform = "translateX(" + sideLength + ") rotateY(90deg)";
+
+      faces[2].style.transformOrigin = "right";
+      faces[2].style.transform = "translateX(-" + sideLength + ") rotateY(-90deg)";
+
+      faces[3].style.transformOrigin = "center";
+      faces[3].style.transform = "translateZ(-" + sideLength + ") rotateY(180deg)";
+
+      faces[4].style.transformOrigin = "bottom";
+      faces[4].style.transform = "rotateX(90deg)";
+
+      faces[5].style.transformOrigin = "bottom";
+      faces[5].style.transform = "translateY(-" + sideLength + ") rotateX(90deg)";
+
+      up.onclick = animations.up;
+
+      down.onclick = animations.down;
+
+      right.onclick = animations.right;
+
+      left.onclick = animations.left;
+    })();
+
+    function cover() {
+      let div = document.createElement('div');
+      div.classList.add('full', 'cover', 'centerOrigin');
+      /* faces.forEach(face => {
+          lastest.tag.removeChild(face);
+          div.appendChild(face);
+      }); */
+      cube.removeChild(lastest.tag);
+      div.appendChild(lastest.tag);
+      cube.appendChild(div);
+      lastest.tag = div;
+    }
+
+    function clicked() {
+      stopListeners();
+
+      setTimeout(returnListeners, duration);
+    }
+
+    function stopListeners() {
+      up.onclick = undefined;
+      down.onclick = undefined;
+      left.onclick = undefined;
+      right.onclick = undefined;
+    }
+
+    function returnListeners() {
+      cover();
+      log(lastest);
+      up.onclick = animations.up;
+      down.onclick = animations.down;
+      right.onclick = animations.right;
+      left.onclick = animations.left;
+
+    }
+  </script>
+</body>
+
+</html>
