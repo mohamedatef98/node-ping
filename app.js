@@ -5,4 +5,7 @@ var path = require('path')
 
 app.use(express.static('static'))
 
-app.listen(80, function() { console.log('Server is running') })
+const port = process.env.PORT
+if(!port) throw new Error('PORT env variable isn\'t set')
+
+app.listen(port, function() { console.log('Server is running') })
