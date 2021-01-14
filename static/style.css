@@ -11,6 +11,9 @@ html, body {
 
 nav{
   background-color: #ccc;
+}
+
+nav, main {
   padding: 1rem;
 }
 
